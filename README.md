@@ -3,6 +3,8 @@ lazy-model
 
 AngularJS directive that works like `ng-model` but accept changes only when form is submitted (otherwise changes are cancelled).
 
+This is a slightly altered version from <a href="https://github.com/vitalets/lazy-model">vitalets'</a> version. Only the last example ("How to send data to server and wait for a response?") is altered.
+
 ### Why this is needed?
 AngularJS 2-way binding is good feature: you change model - and all views are updated instantly.
 But when dealing with forms I often need more transactional way: input something and accept changes or decline it. Official way to do it requires additional code in controller: create copy of model, link it with form and write changes back to original model when form is submitted (see http://docs.angularjs.org/guide/forms).
@@ -89,7 +91,7 @@ $scope.cancel = function() {
 
 Live demo: http://jsfiddle.net/8btk5/10/
 
-### How to send data on server?
+### How to send data to server and wait for a response?
 Please note that in the `ng-submit` hook original models are not updated yet.
 You may use it for validation but not for sending data to the server.
 
@@ -98,6 +100,7 @@ Inside this hook models are updated and you can freely manipulate your models.
 The `lazy-submit` hook must return a promise.
 If the promise resolves, the changes are accepted.
 If the promise is rejected, the changes are reset.
+Always return a promise. If there is no expected answer, return a resolved promise.
 
 ````html
 <form name="frm" lazy-submit="save()" ng-show="formVisible">
@@ -115,7 +118,7 @@ $scope.save = function() {
 };
 ````
 
-<!-- Live demo: http://jsfiddle.net/8btk5/12/ -->
+Live demo: http://jsfiddle.net/b2sfrcc4/1/
 
 ### How to include it in my project?
 1. [Download](http://psomhorst.github.io/lazy-model/lazyModel.js) and include **lazyModel.js**
