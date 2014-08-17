@@ -25,6 +25,11 @@ angular.module('lazyModel', [])
           // getter and setter for original model
           var ngModelGet = $parse($attrs.lazyModel);
           var ngModelSet = ngModelGet.assign;
+          var buffer;
+
+
+          // buffer holds the value while editing, the buffer is applied before
+          // the lazy-submit function is called
 
           // accept changes
           this.accept = function() {
@@ -35,6 +40,20 @@ angular.module('lazyModel', [])
           this.reset = function() {
             $scope.buffer = ngModelGet($scope.$parent);
           };
+
+          // original hold the value while the lazy-submit hook runs; if the
+          // promise is rejected, the original value is restored
+
+          this.setOriginal = function(){
+            $scope.original = ngModelGet($scope.$parent);
+          }
+
+          this.resetToOriginal = function(){
+            ngModelSet($scope.$parent, $scope.original);
+            $scope.buffer = ngModelGet($scope.$parent);
+          }
+
+
 
           // watch for original model change (and initialization also)
           $scope.$watch($attrs.lazyModel, angular.bind(this, function (newValue, oldValue) {
@@ -78,25 +97,23 @@ angular.module('lazyModel', [])
                 $timeout(function() {
                   if (formCtrl.$valid) {
                     // form valid - accept new values
-
+                    for (var i = 0; i < parentCtrl.$lazyControls.length; i++) {
+                      parentCtrl.$lazyControls[i].setOriginal();
+                      parentCtrl.$lazyControls[i].accept();
+                    }
 
                     // call final hook `lazy-submit`
                     if (lazySubmitCtrl) {
+                      console.log('scope', scope, scope.$parent);
                       lazySubmitCtrl
                       .finalSubmit()
-                      .then(function(){
+                      .then(function(){}, function(){
                         for (var i = 0; i < parentCtrl.$lazyControls.length; i++) {
-                          parentCtrl.$lazyControls[i].accept();
-                        }
-                      }, function(){
-                        for (var i = 0; i < parentCtrl.$lazyControls.length; i++) {
-                          parentCtrl.$lazyControls[i].reset();
+                          parentCtrl.$lazyControls[i].resetToOriginal();
                         }
                       });
                     } else {
-                      for (var i = 0; i < parentCtrl.$lazyControls.length; i++) {
-                        parentCtrl.$lazyControls[i].accept();
-                      }
+
                     }
                   }
                 });
@@ -143,6 +160,7 @@ angular.module('lazyModel', [])
         function($element, $attrs, $scope, $parse) {
           var finalHook = $attrs.lazySubmit ? $parse($attrs.lazySubmit) : angular.noop;
           this.finalSubmit = function() {
+            console.log('finalHook', $scope);
             return finalHook($scope);
           };
         }
