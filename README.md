@@ -4,8 +4,8 @@ lazy-model
 AngularJS directive that works like `ng-model` but accept changes only when form is submitted (otherwise changes are cancelled).
 
 ### Why this is needed?
-AngularJS 2-way binding is good feature: you change model - and all views are updated instantly.  
-But when dealing with forms I often need more transactional way: input something and accept changes or decline it. Official way to do it requires additional code in controller: create copy of model, link it with form and write changes back to original model when form is submitted (see http://docs.angularjs.org/guide/forms).  
+AngularJS 2-way binding is good feature: you change model - and all views are updated instantly.
+But when dealing with forms I often need more transactional way: input something and accept changes or decline it. Official way to do it requires additional code in controller: create copy of model, link it with form and write changes back to original model when form is submitted (see http://docs.angularjs.org/guide/forms).
 Being too lazy, I tried to put all that stuff into **lazy-model** directive.
 
 ### How to use it?
@@ -20,12 +20,12 @@ Being too lazy, I tried to put all that stuff into **lazy-model** directive.
 </form>
 ````
 
-Now you can change username, but it will be saved to model only when you press **save**.   
-If you press **cancel** - your changes will be declined.   
+Now you can change username, but it will be saved to model only when you press **save**.
+If you press **cancel** - your changes will be declined.
 Try out demo: http://jsfiddle.net/8btk5/6/
 
-It can be useful for **popup forms** and **modal dialogs.**  
-For example, popup form: 
+It can be useful for **popup forms** and **modal dialogs.**
+For example, popup form:
 ````html
 <form ng-submit="formVisible=false" ng-show="formVisible">
   <input type="text" lazy-model="user.name">
@@ -49,7 +49,7 @@ For example, `ng-maxlength` validator:
 ````
 And check `form.$valid` in submit handler in controller:
 ````js
-$scope.submit = function() {    
+$scope.submit = function() {
   if ($scope.frm.$valid) {
     $scope.formVisible = false;
   }
@@ -59,7 +59,7 @@ Live demo: http://jsfiddle.net/8btk5/8/
 
 #### 2. On-submit validation
 Alternatively, you can perform all validations inside `submit` handler and accept or decline
-changes by setting validity via `$setValidity` method. Don't forget to define `name` attribute 
+changes by setting validity via `$setValidity` method. Don't forget to define `name` attribute
 of form and controls.
 
 ````html
@@ -73,11 +73,11 @@ In controller you should define both `submit` and `cancel` handlers:
 ````js
 $scope.submit = function() {
   if ($scope.frm.username.$modelValue.length > 10) {
-    $scope.frm.username.$setValidity('maxlength', false);  
+    $scope.frm.username.$setValidity('maxlength', false);
   } else {
     $scope.frm.username.$setValidity('maxlength', true);
     $scope.formVisible = false;
-  }  
+  }
 };
 
 $scope.cancel = function() {
@@ -87,13 +87,17 @@ $scope.cancel = function() {
 
 ````
 
-Live demo: http://jsfiddle.net/8btk5/10/ 
+Live demo: http://jsfiddle.net/8btk5/10/
 
 ### How to send data on server?
-Please note that in `ng-submit` hook original models are not updated yet.
-You may use it for validation but not for sending data on server.  
-To send data there is special attribute of `<form>` called `lazy-submit`. 
+Please note that in the `ng-submit` hook original models are not updated yet.
+You may use it for validation but not for sending data to the server.
+
+To send data there is special attribute of `<form>` called `lazy-submit`.
 Inside this hook models are updated and you can freely manipulate your models.
+The `lazy-submit` hook must return a promise.
+If the promise resolves, the changes are accepted.
+If the promise is rejected, the changes are reset.
 
 ````html
 <form name="frm" lazy-submit="save()" ng-show="formVisible">
@@ -103,16 +107,18 @@ Inside this hook models are updated and you can freely manipulate your models.
 
 In controller:
 ````js
-$scope.save = function() { 
+$scope.save = function() {
+  var defered = $q.defer()
   $scope.formVisible = false;
-  sendToServer($scope.user);   
+  sendToServer($scope.user).then(defered.resolve, defered.reject);
+  return defered.promise;
 };
 ````
 
-Live demo: http://jsfiddle.net/8btk5/12/
+<!-- Live demo: http://jsfiddle.net/8btk5/12/ -->
 
 ### How to include it in my project?
-1. [Download](http://vitalets.github.io/lazy-model/lazyModel.js) and include **lazyModel.js**
+1. [Download](http://psomhorst.github.io/lazy-model/lazyModel.js) and include **lazyModel.js**
 2. Set module dependency:
 
     ````js

@@ -50,7 +50,7 @@ angular.module('lazyModel', [])
         var compiled = $compile(elem);
         return {
           pre: function(scope, elem) {
-            // compile element with ng-model directive poining to `scope.buffer`   
+            // compile element with ng-model directive poining to `scope.buffer`
             compiled(scope);
           },
           post: function postLink(scope, elem, attr, ctrls) {
@@ -78,13 +78,25 @@ angular.module('lazyModel', [])
                 $timeout(function() {
                   if (formCtrl.$valid) {
                     // form valid - accept new values
-                    for (var i = 0; i < parentCtrl.$lazyControls.length; i++) {
-                      parentCtrl.$lazyControls[i].accept();
-                    }
+
 
                     // call final hook `lazy-submit`
                     if (lazySubmitCtrl) {
-                      lazySubmitCtrl.finalSubmit();
+                      lazySubmitCtrl
+                      .finalSubmit()
+                      .then(function(){
+                        for (var i = 0; i < parentCtrl.$lazyControls.length; i++) {
+                          parentCtrl.$lazyControls[i].accept();
+                        }
+                      }, function(){
+                        for (var i = 0; i < parentCtrl.$lazyControls.length; i++) {
+                          parentCtrl.$lazyControls[i].reset();
+                        }
+                      });
+                    } else {
+                      for (var i = 0; i < parentCtrl.$lazyControls.length; i++) {
+                        parentCtrl.$lazyControls[i].accept();
+                      }
                     }
                   }
                 });
@@ -131,7 +143,7 @@ angular.module('lazyModel', [])
         function($element, $attrs, $scope, $parse) {
           var finalHook = $attrs.lazySubmit ? $parse($attrs.lazySubmit) : angular.noop;
           this.finalSubmit = function() {
-            finalHook($scope);
+            return finalHook($scope);
           };
         }
       ]
