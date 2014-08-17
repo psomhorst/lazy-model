@@ -104,7 +104,6 @@ angular.module('lazyModel', [])
 
                     // call final hook `lazy-submit`
                     if (lazySubmitCtrl) {
-                      console.log('scope', scope, scope.$parent);
                       lazySubmitCtrl
                       .finalSubmit()
                       .then(function(){}, function(){
@@ -160,7 +159,6 @@ angular.module('lazyModel', [])
         function($element, $attrs, $scope, $parse) {
           var finalHook = $attrs.lazySubmit ? $parse($attrs.lazySubmit) : angular.noop;
           this.finalSubmit = function() {
-            console.log('finalHook', $scope);
             return finalHook($scope);
           };
         }
