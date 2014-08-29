@@ -44,19 +44,19 @@ angular.module('lazyModel', [])
           // original hold the value while the lazy-submit hook runs; if the
           // promise is rejected, the original value is restored
 
-          this.setOriginal = function(){
+          this.setOriginal = function() {
             $scope.original = ngModelGet($scope.$parent);
-          }
+          };
 
-          this.resetToOriginal = function(){
+          this.resetToOriginal = function() {
             ngModelSet($scope.$parent, $scope.original);
             $scope.buffer = ngModelGet($scope.$parent);
-          }
+          };
 
 
 
           // watch for original model change (and initialization also)
-          $scope.$watch($attrs.lazyModel, angular.bind(this, function (newValue, oldValue) {
+          $scope.$watch($attrs.lazyModel, angular.bind(this, function(newValue, oldValue) {
             this.reset();
           }));
         }],
